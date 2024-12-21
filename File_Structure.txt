@@ -1,0 +1,24 @@
+MultiplayerChatServer/
+├── CMakeLists.txt          # Main CMake file (root level)
+├── src/                    # Source code folder
+│   ├── server/             # Server-related code
+│   │   ├── CMakeLists.txt  # CMake file for server
+│   │   ├── main.cpp
+│   │   ├── server.cpp
+│   │   ├── server.hpp
+│   │   ├── file_transfer.cpp
+│   │   └── file_transfer.hpp
+│   └── client/             # Client-related code
+│       ├── CMakeLists.txt  # CMake file for client
+│       ├── main.cpp
+│       ├── client.cpp
+│       ├── client.hpp
+│       ├── user_interface.cpp
+│       └── user_interface.hpp
+├── include/                # Shared headers (used by both server & client)
+│   ├── common.hpp
+│   ├── logger.hpp
+│   └── config.hpp
+├── assets/                 # Chat logs and shared files (optional)
+├── build/                  # Build directory (auto-created during build)
+└── README.md               # Documentation
