@@ -21,8 +21,6 @@ public:
     void run();
 
     void readFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> socket);
-    void letsUploadFile(std::shared_ptr<boost::asio::ip::tcp::socket> socket, const std::string &fileName, size_t fileSize);
-    void letsDownloadFile(std::shared_ptr<boost::asio::ip::tcp::socket> socket, const std::string &fileName);
 };
 
 #endif
