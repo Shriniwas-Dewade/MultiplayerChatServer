@@ -1,5 +1,0 @@
-/home/test/MultiplayerChatServer/build/CMakeFiles/rebuild_cache.dir
-/home/test/MultiplayerChatServer/build/CMakeFiles/edit_cache.dir
-/home/test/MultiplayerChatServer/build/src/server/CMakeFiles/rebuild_cache.dir
-/home/test/MultiplayerChatServer/build/src/server/CMakeFiles/edit_cache.dir
-/home/test/MultiplayerChatServer/build/src/server/CMakeFiles/server.dir
