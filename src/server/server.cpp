@@ -15,7 +15,7 @@ void server::readFromClient(std::shared_ptr<tcp::socket> socket){
     socket->async_read_some(boost::asio::buffer(*buffer), [this, socket, buffer](boost::system::error_code errCode, size_t bytes){
             if (!errCode){
                 std::string message(buffer->data(), bytes);
-                std::cout<<"Message From Client : " << message << std::endl;
+                std::cout<<"Message From Client : " << message;
 
                 if (message.find("Upload:", 0) == 0) {
                     std::istringstream iss(message.substr(7));
@@ -36,7 +36,6 @@ void server::readFromClient(std::shared_ptr<tcp::socket> socket){
                     for (auto &other : _sockets){
                         if (other != socket){
                             auto send_buffer = std::make_shared<std::string>(message);
-
                             boost::asio::async_write(*other, boost::asio::buffer(*send_buffer), [send_buffer](boost::system::error_code errCode, size_t bytes) {});
                         }
                     }
