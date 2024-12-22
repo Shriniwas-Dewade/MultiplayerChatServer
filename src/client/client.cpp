@@ -18,7 +18,7 @@ Client::Client(const std::string& addr, unsigned short port, const std::string& 
 }
 
 void Client::printError(const std::string& errorMessage) {
-    std::cerr << "[Error] " << errorMessage << std::endl;
+    std::cerr << colorText("\n[Error] " + errorMessage, "31") << std::endl;
 }
 
 void Client::start() {
@@ -63,6 +63,13 @@ void Client::handleInput() {
                 sendMSG(message);
             }
         }
+        else if (input.rfind("UPLOAD ", 0) == 0) {
+            std::string filePath = input.substr(7);
+            uploadFile(filePath);
+        } else if (input.rfind("DOWNLOAD ", 0) == 0) {
+            std::string filePath = input.substr(9);
+            downloadFile(filePath);
+        }
         else {
             printError("Invalid command. Try SEND, UPLOAD, DOWNLOAD, or EXIT.");
         }
@@ -93,5 +100,49 @@ void Client::receiveMSG() {
     }
     catch (std::exception& err) {
         printError("Error while sending message : " + std::string(err.what()));
+    }
+}
+
+void Client::downloadFile(const std::string& filePath) {
+    try {
+        std::string command = _userName + ": DOWNLOAD:" + filePath + "\n";
+        boost::asio::write(_socket, boost::asio::buffer(command));
+
+        std::ofstream outFile(filePath, std::ios::binary);
+        if (!outFile.is_open()) {
+            printError("Failed to open file for writing: " + filePath);
+            return;
+        }
+
+        char buffer[1024];
+        std::size_t bytesRead;
+        while ((bytesRead = _socket.read_some(boost::asio::buffer(buffer))) > 0) {
+            outFile.write(buffer, bytesRead);
+        }
+        std::cout << "File download completed: " << filePath << std::endl;
+    } catch (const std::exception& e) {
+        printError("Error downloading file: " + std::string(e.what()));
+    }
+}
+
+void Client::uploadFile(const std::string& filePath) {
+    try {
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file.is_open()) {
+            printError("Failed to open file: " + filePath);
+            return;
+        }
+
+        std::size_t fileSize = std::filesystem::file_size(filePath);
+        std::string command = _userName + ": UPLOAD:" + filePath + " " + std::to_string(fileSize) + "\n";
+        boost::asio::write(_socket, boost::asio::buffer(command));
+
+        char buffer[1024];
+        while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
+            boost::asio::write(_socket, boost::asio::buffer(buffer, file.gcount()));
+        }
+        std::cout << "File upload completed: " << filePath << std::endl;
+    } catch (const std::exception& e) {
+        printError("Error uploading file: " + std::string(e.what()));
     }
 }
