@@ -9,7 +9,7 @@ int main(){
         server.run();
     }
     catch (const std::exception& er) {
-        std::cout<<"\n Some Error Occured : " << er.what() << std::endl;
+        std::cout<<"Some Error Occured : " << er.what() << std::endl;
     }
 
     return 0;

@@ -1,9 +1,12 @@
 #include "server.hpp"
+#include "file_transfer.hpp"
 
 using namespace boost::asio::ip;
 
+File_Transfer fileTransfer;
+
 server::server(const std::string &addr, unsigned short port) : _accepter(_ioContext, tcp::endpoint(make_address(addr), port)){
-    std::cout<<"\n Server has been started on : " << addr << " and port is : " << port << std::endl;
+    std::cout<<"Server has been started on : " << addr << " and port is : " << port << std::endl;
 }
 
 void server::readFromClient(std::shared_ptr<tcp::socket> socket){
@@ -12,9 +15,22 @@ void server::readFromClient(std::shared_ptr<tcp::socket> socket){
     socket->async_read_some(boost::asio::buffer(*buffer), [this, socket, buffer](boost::system::error_code errCode, size_t bytes){
             if (!errCode){
                 std::string message(buffer->data(), bytes);
-                std::cout<<"\n Message From Client : " << message << std::endl;
+                std::cout<<"Message From Client : " << message << std::endl;
 
-                {
+                if (message.find("Upload:", 0) == 0) {
+                    std::istringstream iss(message.substr(7));
+                    std::string fileName;
+                    size_t fileSize;
+                    iss >> fileName >> fileSize;
+                    std::cout<<"starting to upload file : "<< fileName << std::endl;
+                    fileTransfer.letsUploadFile(socket, fileName, fileSize);
+                } 
+                else if (message.find("Download:", 0) == 0) {
+                    std::string fileName = message.substr(9);
+                    std::cout<<"starting to download file : "<< fileName << std::endl;
+                    fileTransfer.letsDownloadFile(socket, fileName);
+                }
+                else {
                     std::lock_guard<std::mutex> lock(client_mutex);
 
                     for (auto &other : _sockets){
@@ -30,7 +46,7 @@ void server::readFromClient(std::shared_ptr<tcp::socket> socket){
             }
             else {
                 
-                std::cerr<<"\n Client Has been disconnected : " << socket->remote_endpoint() << std::endl;
+                std::cerr<<"Client Has been disconnected : " << socket->remote_endpoint() << std::endl;
 
                 {
                     std::lock_guard<std::mutex> lock(client_mutex);
@@ -50,11 +66,11 @@ void server::acceptConnections(){
                 _sockets.push_back(socket);
             }
 
-            std::cout<<"\n Client has been connnected : " << socket->remote_endpoint() << std::endl;
+            std::cout<<"Client has been connnected : " << socket->remote_endpoint() << std::endl;
             readFromClient(socket);
         }
         else {
-            std::cout<< "\n Error has been occured : " << errCode.message() << std::endl;
+            std::cout<< "Error has been occured : " << errCode.message() << std::endl;
 
             {
                 std::lock_guard<std::mutex> lock(client_mutex);
